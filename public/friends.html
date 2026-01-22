@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <title>Friends & Splits - Expense Tracker</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <!-- Animated Particles -->
+    <div class="particles" id="particles"></div>
+    
+    <nav class="navbar navbar-expand-lg">
+        <div class="container-fluid">
+            <h2 class="navbar-brand mb-0">Expense Tracker</h2>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto align-items-lg-center">
+                    <li class="nav-item">
+                        <a href="index.html" class="nav-link">
+                            <i class="bi bi-speedometer2 me-1"></i>Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="analytics.html" class="nav-link">
+                            <i class="bi bi-graph-up me-1"></i>Analytics
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="friends.html" class="nav-link active">
+                            <i class="bi bi-people me-1"></i>Friends
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <span class="nav-link" id="user-name">
+                            <i class="bi bi-person-circle me-1"></i>
+                        </span>
+                    </li>
+                    <li class="nav-item">
+                        <button class="btn-logout" onclick="logout()">
+                            <i class="bi bi-box-arrow-right me-1"></i>Logout
+                        </button>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="friends-section">
+            <h2><i class="bi bi-people-fill"></i> Friends & Settlements</h2>
+
+            <!-- Balance Summary -->
+            <div class="balance-summary-grid">
+                <div class="balance-card positive">
+                    <div class="balance-icon"><i class="bi bi-arrow-down-circle"></i></div>
+                    <div class="balance-info">
+                        <h4>You'll Get</h4>
+                        <p class="balance-amount" id="total-owed">₹0</p>
+                    </div>
+                </div>
+                <div class="balance-card negative">
+                    <div class="balance-icon"><i class="bi bi-arrow-up-circle"></i></div>
+                    <div class="balance-info">
+                        <h4>You Owe</h4>
+                        <p class="balance-amount" id="total-owing">₹0</p>
+                    </div>
+                </div>
+                <div class="balance-card net">
+                    <div class="balance-icon"><i class="bi bi-wallet2"></i></div>
+                    <div class="balance-info">
+                        <h4>Net Balance</h4>
+                        <p class="balance-amount" id="net-balance">₹0</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Add Friend Button -->
+            <div class="card">
+                <button class="btn-add-friend" id="add-friend-btn">
+                    <i class="bi bi-person-plus"></i> Add Friend
+                </button>
+            </div>
+
+            <!-- Friends List -->
+            <div class="card">
+                <h3><i class="bi bi-people"></i> Your Friends</h3>
+                <div id="friends-list"></div>
+            </div>
+
+            <!-- Recent Splits -->
+            <div class="card">
+                <h3><i class="bi bi-receipt"></i> Recent Split Expenses</h3>
+                <div id="splits-list"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Friend Modal -->
+    <div id="add-friend-modal" class="custom-modal-overlay">
+        <div class="custom-modal">
+            <div class="custom-modal-header">
+                <h3><i class="bi bi-person-plus"></i> Add Friend</h3>
+                <button class="custom-modal-close" id="close-friend-modal">&times;</button>
+            </div>
+            <div class="custom-modal-body">
+                <form id="add-friend-form">
+                    <div class="form-group">
+                        <label>Friend Name *</label>
+                        <input type="text" id="friend-name" placeholder="Enter name" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Email (Optional)</label>
+                        <input type="email" id="friend-email" placeholder="friend@email.com">
+                    </div>
+                    <div class="form-group">
+                        <label>Phone (Optional)</label>
+                        <input type="tel" id="friend-phone" placeholder="+91 1234567890">
+                    </div>
+                    <button type="submit" class="btn-save-budget">
+                        <i class="bi bi-check-circle"></i> Add Friend
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Settle Modal -->
+    <div id="settle-modal" class="custom-modal-overlay">
+        <div class="custom-modal">
+            <div class="custom-modal-header">
+                <h3><i class="bi bi-check-circle"></i> Settle Up</h3>
+                <button class="custom-modal-close" id="close-settle-modal">&times;</button>
+            </div>
+            <div class="custom-modal-body">
+                <div class="settle-info">
+                    <p id="settle-message"></p>
+                </div>
+                <button class="btn-save-budget" id="confirm-settle-btn">
+                    <i class="bi bi-check-circle"></i> Confirm Settlement
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Friend Details Modal -->
+    <div id="friend-details-modal" class="custom-modal-overlay">
+        <div class="custom-modal" style="max-width: 700px;">
+            <div class="custom-modal-header">
+                <h3><i class="bi bi-person-circle"></i> <span id="detail-friend-name"></span></h3>
+                <button class="custom-modal-close" id="close-details-modal">&times;</button>
+            </div>
+            <div class="custom-modal-body">
+                <!-- Friend Info -->
+                <div class="friend-detail-info">
+                    <div class="detail-row">
+                        <span class="detail-label"><i class="bi bi-envelope"></i> Email:</span>
+                        <span class="detail-value" id="detail-email">-</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label"><i class="bi bi-phone"></i> Phone:</span>
+                        <span class="detail-value" id="detail-phone">-</span>
+                    </div>
+                    <div class="detail-row balance-row">
+                        <span class="detail-label"><i class="bi bi-wallet2"></i> Balance:</span>
+                        <span class="detail-value" id="detail-balance">₹0</span>
+                    </div>
+                </div>
+
+                <!-- Transaction History -->
+                <div class="transaction-history">
+                    <h4><i class="bi bi-clock-history"></i> Transaction History</h4>
+                    <div id="transaction-list"></div>
+                </div>
+
+                <!-- Statistics -->
+                <div class="friend-stats">
+                    <h4><i class="bi bi-bar-chart"></i> Statistics</h4>
+                    <div class="stats-row">
+                        <div class="stat-item">
+                            <span class="stat-label">Total Splits:</span>
+                            <span class="stat-value" id="stat-total-splits">0</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Total Amount:</span>
+                            <span class="stat-value" id="stat-total-amount">₹0</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Settled:</span>
+                            <span class="stat-value" id="stat-settled">0</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Pending:</span>
+                            <span class="stat-value" id="stat-pending">0</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Payment Reminder Modal -->
+    <div id="reminder-modal" class="custom-modal-overlay">
+        <div class="custom-modal reminder-modal">
+            <div class="custom-modal-header">
+                <h3><i class="bi bi-bell"></i> Send Payment Reminder</h3>
+                <button class="custom-modal-close" id="close-reminder-modal">&times;</button>
+            </div>
+            <div class="custom-modal-body">
+                <div class="reminder-info">
+                    <div class="reminder-friend-info">
+                        <i class="bi bi-person-circle"></i>
+                        <div>
+                            <h4 id="reminder-friend-name"></h4>
+                            <p id="reminder-amount" class="reminder-amount"></p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="reminder-methods">
+                    <h4><i class="bi bi-send"></i> Choose Reminder Method</h4>
+                    
+                    <button class="reminder-method-btn whatsapp" onclick="sendReminderVia('whatsapp')">
+                        <div class="method-icon">
+                            <i class="bi bi-whatsapp"></i>
+                        </div>
+                        <div class="method-info">
+                            <h5>WhatsApp</h5>
+                            <p>Send reminder via WhatsApp</p>
+                        </div>
+                        <i class="bi bi-chevron-right"></i>
+                    </button>
+
+                    <button class="reminder-method-btn sms" onclick="sendReminderVia('sms')">
+                        <div class="method-icon">
+                            <i class="bi bi-chat-dots"></i>
+                        </div>
+                        <div class="method-info">
+                            <h5>SMS</h5>
+                            <p>Send text message reminder</p>
+                        </div>
+                        <i class="bi bi-chevron-right"></i>
+                    </button>
+
+                    <button class="reminder-method-btn email" onclick="sendReminderVia('email')">
+                        <div class="method-icon">
+                            <i class="bi bi-envelope"></i>
+                        </div>
+                        <div class="method-info">
+                            <h5>Email</h5>
+                            <p>Send email reminder</p>
+                        </div>
+                        <i class="bi bi-chevron-right"></i>
+                    </button>
+
+                    <button class="reminder-method-btn link" onclick="sendReminderVia('link')">
+                        <div class="method-icon">
+                            <i class="bi bi-link-45deg"></i>
+                        </div>
+                        <div class="method-info">
+                            <h5>Copy Payment Link</h5>
+                            <p>Share payment link anywhere</p>
+                        </div>
+                        <i class="bi bi-chevron-right"></i>
+                    </button>
+                </div>
+
+                <div class="reminder-history" id="reminder-history">
+                    <h4><i class="bi bi-clock-history"></i> Recent Reminders</h4>
+                    <div id="reminder-history-list"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="js/friends.js"></script>
+</body>
+</html>
