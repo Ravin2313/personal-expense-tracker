@@ -7,11 +7,31 @@ let currentUser = null;
 let allExpenses = []; // Store all expenses for filtering
 let monthlyBudget = parseFloat(localStorage.getItem('monthlyBudget')) || 0;
 
+// Wait for DOM to be ready
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('DOM loaded, initializing auth forms...');
+    initAuthForms();
+});
+
+// Initialize Auth Forms
+function initAuthForms() {
+    const loginForm = document.getElementById('login-form');
+    const registerForm = document.getElementById('register-form');
+    
+    if (!loginForm || !registerForm) {
+        console.error('Auth forms not found!');
+        return;
+    }
+    
+    console.log('Auth forms found, attaching listeners...');
+
 // Auth Functions
-document.getElementById('login-form').addEventListener('submit', async (e) => {
+loginForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     const email = document.getElementById('login-email').value;
     const password = document.getElementById('login-password').value;
+
+    console.log('Login attempt:', { email });
 
     try {
         const res = await fetch(`${API_URL}/auth/login`, {
@@ -20,25 +40,31 @@ document.getElementById('login-form').addEventListener('submit', async (e) => {
             body: JSON.stringify({ email, password })
         });
 
+        console.log('Login response status:', res.status);
         const data = await res.json();
+        console.log('Login response data:', data);
+
         if (res.ok) {
             token = data.token;
             localStorage.setItem('token', token);
             currentUser = data.user;
             showMainApp();
         } else {
-            alert(data.message);
+            alert(data.message || 'Login failed');
         }
     } catch (err) {
-        alert('Login failed');
+        console.error('Login error:', err);
+        alert('Login failed: ' + err.message);
     }
 });
 
-document.getElementById('register-form').addEventListener('submit', async (e) => {
+registerForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     const name = document.getElementById('register-name').value;
     const email = document.getElementById('register-email').value;
     const password = document.getElementById('register-password').value;
+
+    console.log('Registration attempt:', { name, email });
 
     try {
         const res = await fetch(`${API_URL}/auth/register`, {
@@ -47,19 +73,25 @@ document.getElementById('register-form').addEventListener('submit', async (e) =>
             body: JSON.stringify({ name, email, password })
         });
 
+        console.log('Register response status:', res.status);
         const data = await res.json();
+        console.log('Register response data:', data);
+
         if (res.ok) {
             token = data.token;
             localStorage.setItem('token', token);
             currentUser = data.user;
             showMainApp();
         } else {
-            alert(data.message);
+            alert(data.message || 'Registration failed');
         }
     } catch (err) {
-        alert('Registration failed');
+        console.error('Registration error:', err);
+        alert('Registration failed: ' + err.message);
     }
 });
+
+} // End of initAuthForms
 
 function showLogin() {
     document.getElementById('login-form').style.display = 'block';
