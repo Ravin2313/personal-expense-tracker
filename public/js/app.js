@@ -7,91 +7,108 @@ let currentUser = null;
 let allExpenses = []; // Store all expenses for filtering
 let monthlyBudget = parseFloat(localStorage.getItem('monthlyBudget')) || 0;
 
-// Wait for DOM to be ready
-document.addEventListener('DOMContentLoaded', function() {
-    console.log('DOM loaded, initializing auth forms...');
+// Initialize everything when DOM is ready
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initApp);
+} else {
+    initApp();
+}
+
+function initApp() {
+    console.log('🚀 Initializing app...');
     initAuthForms();
-});
+}
 
 // Initialize Auth Forms
 function initAuthForms() {
     const loginForm = document.getElementById('login-form');
     const registerForm = document.getElementById('register-form');
     
-    if (!loginForm || !registerForm) {
-        console.error('Auth forms not found!');
+    if (!loginForm) {
+        console.error('❌ Login form not found!');
         return;
     }
     
-    console.log('Auth forms found, attaching listeners...');
-
-// Auth Functions
-loginForm.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const email = document.getElementById('login-email').value;
-    const password = document.getElementById('login-password').value;
-
-    console.log('Login attempt:', { email });
-
-    try {
-        const res = await fetch(`${API_URL}/auth/login`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email, password })
-        });
-
-        console.log('Login response status:', res.status);
-        const data = await res.json();
-        console.log('Login response data:', data);
-
-        if (res.ok) {
-            token = data.token;
-            localStorage.setItem('token', token);
-            currentUser = data.user;
-            showMainApp();
-        } else {
-            alert(data.message || 'Login failed');
-        }
-    } catch (err) {
-        console.error('Login error:', err);
-        alert('Login failed: ' + err.message);
+    if (!registerForm) {
+        console.error('❌ Register form not found!');
+        return;
     }
-});
+    
+    console.log('✅ Auth forms found, attaching listeners...');
 
-registerForm.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const name = document.getElementById('register-name').value;
-    const email = document.getElementById('register-email').value;
-    const password = document.getElementById('register-password').value;
+    // Login Form Handler
+    loginForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        console.log('📝 Login form submitted');
+        
+        const email = document.getElementById('login-email').value;
+        const password = document.getElementById('login-password').value;
 
-    console.log('Registration attempt:', { name, email });
+        console.log('Login attempt:', { email });
 
-    try {
-        const res = await fetch(`${API_URL}/auth/register`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ name, email, password })
-        });
+        try {
+            const res = await fetch(`${API_URL}/auth/login`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, password })
+            });
 
-        console.log('Register response status:', res.status);
-        const data = await res.json();
-        console.log('Register response data:', data);
+            console.log('Login response status:', res.status);
+            const data = await res.json();
+            console.log('Login response data:', data);
 
-        if (res.ok) {
-            token = data.token;
-            localStorage.setItem('token', token);
-            currentUser = data.user;
-            showMainApp();
-        } else {
-            alert(data.message || 'Registration failed');
+            if (res.ok) {
+                token = data.token;
+                localStorage.setItem('token', token);
+                currentUser = data.user;
+                showMainApp();
+            } else {
+                alert(data.message || 'Login failed');
+            }
+        } catch (err) {
+            console.error('Login error:', err);
+            alert('Login failed: ' + err.message);
         }
-    } catch (err) {
-        console.error('Registration error:', err);
-        alert('Registration failed: ' + err.message);
-    }
-});
+    });
 
-} // End of initAuthForms
+    // Register Form Handler
+    registerForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        console.log('📝 Register form submitted');
+        
+        const name = document.getElementById('register-name').value;
+        const email = document.getElementById('register-email').value;
+        const password = document.getElementById('register-password').value;
+
+        console.log('Registration attempt:', { name, email });
+
+        try {
+            const res = await fetch(`${API_URL}/auth/register`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name, email, password })
+            });
+
+            console.log('Register response status:', res.status);
+            const data = await res.json();
+            console.log('Register response data:', data);
+
+            if (res.ok) {
+                token = data.token;
+                localStorage.setItem('token', token);
+                currentUser = data.user;
+                showMainApp();
+            } else {
+                alert(data.message || 'Registration failed');
+            }
+        } catch (err) {
+            console.error('Registration error:', err);
+            alert('Registration failed: ' + err.message);
+        }
+    });
+    
+    console.log('✅ Auth form listeners attached successfully');
+}
 
 function showLogin() {
     document.getElementById('login-form').style.display = 'block';
