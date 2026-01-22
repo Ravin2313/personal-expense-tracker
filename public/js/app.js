@@ -98,6 +98,9 @@ async function showMainApp() {
         incomeDateInput.valueAsDate = new Date();
     }
     
+    // Load budget and alert settings from database
+    await loadBudgetFromDatabase();
+    
     await loadCategories();
     await loadFriends(); // Load friends for split dropdown
     await loadIncome(); // Load income
@@ -853,9 +856,10 @@ function setupBudgetModal() {
                 return;
             }
             
-            // Save budget
+            // Save budget to database
+            await saveBudgetToDatabase(amount);
+            
             monthlyBudget = amount;
-            localStorage.setItem('monthlyBudget', amount);
             console.log('✅ Budget saved:', amount);
             
             // Update display
@@ -1085,22 +1089,14 @@ let budgetAlertSettings = {
     notificationSound: true
 };
 
-// Load alert settings from localStorage
-function loadAlertSettings() {
-    const saved = localStorage.getItem('budgetAlertSettings');
-    if (saved) {
-        budgetAlertSettings = JSON.parse(saved);
-        
-        // Update UI
-        document.getElementById('alert-80-enabled').checked = budgetAlertSettings.threshold80;
-        document.getElementById('alert-100-enabled').checked = budgetAlertSettings.threshold100;
-        document.getElementById('daily-limit').value = budgetAlertSettings.dailyLimit || '';
-        document.getElementById('notification-sound').checked = budgetAlertSettings.notificationSound;
-    }
+// Load alert settings from database (called after login)
+async function loadAlertSettings() {
+    // Budget load function will handle alert settings too
+    await loadBudgetFromDatabase();
 }
 
 // Save alert settings
-function saveAlertSettings() {
+async function saveAlertSettings() {
     budgetAlertSettings = {
         enabled: true,
         threshold80: document.getElementById('alert-80-enabled').checked,
@@ -1109,7 +1105,8 @@ function saveAlertSettings() {
         notificationSound: document.getElementById('notification-sound').checked
     };
     
-    localStorage.setItem('budgetAlertSettings', JSON.stringify(budgetAlertSettings));
+    // Save to database
+    await saveAlertSettingsToDatabase();
 }
 
 // Check budget alerts
@@ -1327,3 +1324,132 @@ async function checkAndShowAlerts() {
 
 // Load alert settings on page load
 loadAlertSettings();
+
+
+// ============ DATABASE BUDGET FUNCTIONS ============
+
+// Save budget to database
+async function saveBudgetToDatabase(amount) {
+    const now = new Date();
+    const month = now.getMonth() + 1;
+    const year = now.getFullYear();
+    
+    try {
+        const res = await fetch(`${API_URL}/budgets/monthly`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'x-auth-token': token
+            },
+            body: JSON.stringify({
+                amount,
+                month,
+                year,
+                alertSettings: budgetAlertSettings
+            })
+        });
+        
+        if (!res.ok) {
+            throw new Error('Failed to save budget');
+        }
+        
+        const data = await res.json();
+        console.log('✅ Budget saved to database:', data);
+        return data;
+    } catch (err) {
+        console.error('Error saving budget:', err);
+        alert('Failed to save budget to server');
+    }
+}
+
+// Load budget from database
+async function loadBudgetFromDatabase() {
+    const now = new Date();
+    const month = now.getMonth() + 1;
+    const year = now.getFullYear();
+    
+    try {
+        const res = await fetch(`${API_URL}/budgets/monthly/${month}/${year}`, {
+            headers: {
+                'x-auth-token': token
+            }
+        });
+        
+        if (!res.ok) {
+            console.log('No budget found in database');
+            return null;
+        }
+        
+        const budget = await res.json();
+        
+        if (budget) {
+            monthlyBudget = budget.amount;
+            
+            // Load alert settings
+            if (budget.alertSettings) {
+                budgetAlertSettings = {
+                    enabled: budget.alertSettings.enabled !== false,
+                    threshold80: budget.alertSettings.threshold80 !== false,
+                    threshold100: budget.alertSettings.threshold100 !== false,
+                    dailyLimit: budget.alertSettings.dailyLimit || 0,
+                    notificationSound: budgetAlertSettings.notificationSound // Keep local sound preference
+                };
+                
+                // Update UI
+                updateAlertSettingsUI();
+            }
+            
+            console.log('✅ Budget loaded from database:', budget);
+            return budget;
+        }
+        
+        return null;
+    } catch (err) {
+        console.error('Error loading budget:', err);
+        return null;
+    }
+}
+
+// Save alert settings to database
+async function saveAlertSettingsToDatabase() {
+    const now = new Date();
+    const month = now.getMonth() + 1;
+    const year = now.getFullYear();
+    
+    try {
+        const res = await fetch(`${API_URL}/budgets/alert-settings/${month}/${year}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'x-auth-token': token
+            },
+            body: JSON.stringify({
+                alertSettings: budgetAlertSettings
+            })
+        });
+        
+        if (!res.ok) {
+            throw new Error('Failed to save alert settings');
+        }
+        
+        const data = await res.json();
+        console.log('✅ Alert settings saved to database:', data);
+        return data;
+    } catch (err) {
+        console.error('Error saving alert settings:', err);
+        // Don't show alert to user, just log
+    }
+}
+
+// Update alert settings UI
+function updateAlertSettingsUI() {
+    const alert80El = document.getElementById('alert-80-enabled');
+    const alert100El = document.getElementById('alert-100-enabled');
+    const dailyLimitEl = document.getElementById('daily-limit');
+    const soundEl = document.getElementById('notification-sound');
+    
+    if (alert80El) alert80El.checked = budgetAlertSettings.threshold80;
+    if (alert100El) alert100El.checked = budgetAlertSettings.threshold100;
+    if (dailyLimitEl) dailyLimitEl.value = budgetAlertSettings.dailyLimit || '';
+    if (soundEl) soundEl.checked = budgetAlertSettings.notificationSound;
+}
