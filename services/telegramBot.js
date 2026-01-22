@@ -14,7 +14,35 @@ class TelegramBotService {
     }
 
     try {
-      this.bot = new TelegramBot(token, { polling: true });
+      // Set polling options with error handling
+      this.bot = new TelegramBot(token, { 
+        polling: {
+          interval: 1000,
+          autoStart: true,
+          params: {
+            timeout: 10
+          }
+        }
+      });
+
+      // Handle polling errors gracefully
+      this.bot.on('polling_error', (error) => {
+        if (error.code === 'ETELEGRAM' && error.message.includes('409')) {
+          console.error('⚠️ Telegram Bot Conflict: Another instance is already running with this token.');
+          console.error('💡 Solution: Stop other instances or use a different bot token.');
+          // Stop polling to prevent spam
+          this.bot.stopPolling();
+          this.isInitialized = false;
+          return;
+        }
+        console.error('Telegram polling error:', error.message);
+      });
+
+      // Handle webhook errors
+      this.bot.on('webhook_error', (error) => {
+        console.error('Telegram webhook error:', error.message);
+      });
+
       this.isInitialized = true;
       this.setupCommands();
       this.setupScheduledReports();
@@ -22,6 +50,7 @@ class TelegramBotService {
       return true;
     } catch (error) {
       console.error('❌ Failed to initialize Telegram bot:', error.message);
+      this.isInitialized = false;
       return false;
     }
   }
@@ -313,6 +342,20 @@ Friends who owe you:
   // Check if bot is initialized
   isReady() {
     return this.isInitialized && this.bot !== null;
+  }
+
+  // Cleanup and stop bot
+  async stop() {
+    if (this.bot) {
+      try {
+        await this.bot.stopPolling();
+        this.bot = null;
+        this.isInitialized = false;
+        console.log('✅ Telegram bot stopped successfully');
+      } catch (error) {
+        console.error('Error stopping bot:', error.message);
+      }
+    }
   }
 }
 
