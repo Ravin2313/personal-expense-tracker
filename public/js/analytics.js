@@ -1,4 +1,7 @@
-const API_URL = 'http://localhost:5000/api';
+// Auto-detect API URL based on environment
+const API_URL = window.location.hostname === 'localhost' 
+    ? 'http://localhost:5000/api' 
+    : `${window.location.origin}/api`;
 let token = localStorage.getItem('token');
 let currentUser = null;
 
