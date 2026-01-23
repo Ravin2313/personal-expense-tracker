@@ -3,16 +3,22 @@ const API_URL = window.location.hostname === 'localhost'
     ? 'http://localhost:5000/api' 
     : `${window.location.origin}/api`;
 
+console.log('🌐 Settings - API URL:', API_URL);
+
 let token = localStorage.getItem('token');
 let currentUser = null;
 
+console.log('🔑 Token exists:', !!token);
+
 // Check authentication
 if (!token) {
+    console.log('❌ No token found, redirecting to login');
     window.location.href = 'index.html';
 }
 
 // Initialize
 document.addEventListener('DOMContentLoaded', async () => {
+    console.log('📄 Settings page loaded');
     await loadUserProfile();
     await loadUserStats();
     setupForms();
@@ -20,13 +26,18 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 // Load user profile
 async function loadUserProfile() {
+    console.log('👤 Loading user profile...');
     try {
+        console.log('📤 Fetching:', `${API_URL}/auth/me`);
         const res = await fetch(`${API_URL}/auth/me`, {
             headers: { 'x-auth-token': token }
         });
 
+        console.log('📥 Response status:', res.status);
+
         if (!res.ok) {
             if (res.status === 401) {
+                console.error('❌ Unauthorized - Token invalid');
                 localStorage.removeItem('token');
                 window.location.href = 'index.html';
                 return;
@@ -35,6 +46,7 @@ async function loadUserProfile() {
         }
 
         currentUser = await res.json();
+        console.log('✅ User profile loaded:', currentUser);
         
         // Update UI
         document.getElementById('user-name-display').textContent = currentUser.name;
@@ -46,7 +58,7 @@ async function loadUserProfile() {
         document.getElementById('edit-email').value = currentUser.email;
         
     } catch (err) {
-        console.error('Error loading profile:', err);
+        console.error('❌ Error loading profile:', err);
         showNotification('Failed to load profile', 'error');
     }
 }
