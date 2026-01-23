@@ -3789,3 +3789,276 @@ select.modern-input {
 .auth-form input:valid:not(:placeholder-shown) {
     border-color: #10b981;
 }
+
+
+/* ============ SETTINGS PAGE ============ */
+.settings-container {
+    max-width: 1200px;
+    margin: 2rem auto;
+    padding: 0 1rem;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+    gap: 2rem;
+}
+
+.settings-card {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
+    border-radius: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    overflow: hidden;
+    animation: slideInUp 0.5s ease;
+}
+
+.settings-card-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    padding: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.settings-card-header i {
+    font-size: 2rem;
+    color: white;
+}
+
+.settings-card-header h3 {
+    margin: 0;
+    color: white;
+    font-size: 1.5rem;
+}
+
+.settings-card-body {
+    padding: 2rem;
+}
+
+/* Profile Info */
+.profile-info {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+    margin-bottom: 2rem;
+    padding-bottom: 2rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.profile-avatar {
+    font-size: 5rem;
+    color: #667eea;
+}
+
+.profile-details h4 {
+    margin: 0 0 0.5rem 0;
+    color: white;
+    font-size: 1.5rem;
+}
+
+.profile-details p {
+    margin: 0.25rem 0;
+    color: rgba(255, 255, 255, 0.7);
+}
+
+/* Profile Stats */
+.profile-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 1.5rem;
+}
+
+.stat-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.stat-item i {
+    font-size: 2rem;
+    color: #667eea;
+}
+
+.stat-item h5 {
+    margin: 0;
+    color: white;
+    font-size: 1.5rem;
+    font-weight: 600;
+}
+
+.stat-item p {
+    margin: 0;
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 0.85rem;
+}
+
+/* Forms */
+.settings-card-body .form-group {
+    margin-bottom: 1.5rem;
+}
+
+.settings-card-body label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: rgba(255, 255, 255, 0.9);
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+}
+
+.settings-card-body .form-control {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: white;
+    padding: 0.75rem 1rem;
+    border-radius: 10px;
+    transition: all 0.3s ease;
+}
+
+.settings-card-body .form-control:focus {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    outline: none;
+}
+
+.settings-card-body .form-control:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.settings-card-body .btn {
+    padding: 0.75rem 2rem;
+    border-radius: 25px;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.settings-card-body .btn-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+.settings-card-body .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+}
+
+.settings-card-body small {
+    display: block;
+    margin-top: 0.25rem;
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 0.85rem;
+}
+
+/* Telegram Info */
+.telegram-info {
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.telegram-steps {
+    margin: 1.5rem 0;
+    padding: 1rem;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 10px;
+}
+
+.telegram-steps h5 {
+    color: white;
+    margin-bottom: 1rem;
+}
+
+.telegram-steps ol {
+    margin: 0;
+    padding-left: 1.5rem;
+}
+
+.telegram-steps li {
+    margin-bottom: 0.5rem;
+}
+
+.telegram-steps code {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
+    color: #667eea;
+}
+
+.telegram-status {
+    margin-top: 1rem;
+}
+
+.telegram-status .badge {
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+}
+
+/* Notification */
+.notification {
+    position: fixed;
+    top: -100px;
+    right: 2rem;
+    background: white;
+    padding: 1rem 1.5rem;
+    border-radius: 12px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    z-index: 10000;
+    transition: top 0.3s ease;
+    min-width: 300px;
+}
+
+.notification.show {
+    top: 2rem;
+}
+
+.notification i {
+    font-size: 1.5rem;
+}
+
+.notification-success {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: white;
+}
+
+.notification-error {
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    color: white;
+}
+
+.notification-info {
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    color: white;
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+    .settings-container {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+    
+    .profile-info {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .profile-stats {
+        grid-template-columns: 1fr;
+    }
+    
+    .notification {
+        right: 1rem;
+        left: 1rem;
+        min-width: auto;
+    }
+}
