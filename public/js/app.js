@@ -1637,6 +1637,8 @@ function updateAlertSettingsUI() {
 
 // ============ PWA SERVICE WORKER ============
 
+// TEMPORARILY DISABLED - Uncomment to enable PWA features
+/*
 // Register Service Worker
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
@@ -1742,3 +1744,5 @@ function isPWA() {
 if (isPWA()) {
     console.log('✅ Running as PWA');
 }
+*/
+// PWA temporarily disabled for cache issues
