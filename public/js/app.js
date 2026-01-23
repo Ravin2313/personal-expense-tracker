@@ -19,6 +19,35 @@ function initApp() {
     initAuthForms();
 }
 
+// Show notification
+function showNotification(message, type = 'info') {
+    // Remove existing notifications
+    const existing = document.querySelector('.auth-notification');
+    if (existing) existing.remove();
+    
+    const notification = document.createElement('div');
+    notification.className = `auth-notification auth-notification-${type}`;
+    notification.innerHTML = `
+        <i class="bi ${type === 'success' ? 'bi-check-circle' : type === 'error' ? 'bi-x-circle' : 'bi-info-circle'}"></i>
+        <span>${message}</span>
+    `;
+    
+    const authBox = document.querySelector('.auth-box');
+    authBox.insertBefore(notification, authBox.firstChild);
+    
+    // Auto remove after 5 seconds
+    setTimeout(() => {
+        notification.classList.add('fade-out');
+        setTimeout(() => notification.remove(), 300);
+    }, 5000);
+}
+
+// Validate email format
+function isValidEmail(email) {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+}
+
 // Initialize Auth Forms
 function initAuthForms() {
     const loginForm = document.getElementById('login-form');
@@ -41,10 +70,34 @@ function initAuthForms() {
         e.preventDefault();
         console.log('📝 Login form submitted');
         
-        const email = document.getElementById('login-email').value;
-        const password = document.getElementById('login-password').value;
+        const emailInput = document.getElementById('login-email');
+        const passwordInput = document.getElementById('login-password');
+        const submitBtn = loginForm.querySelector('button[type="submit"]');
+        
+        const email = emailInput.value.trim();
+        const password = passwordInput.value;
 
-        console.log('Login attempt:', { email });
+        // Validation
+        if (!email || !password) {
+            showNotification('Please fill in all fields', 'error');
+            return;
+        }
+
+        if (!isValidEmail(email)) {
+            showNotification('Please enter a valid email address', 'error');
+            emailInput.focus();
+            return;
+        }
+
+        if (password.length < 6) {
+            showNotification('Password must be at least 6 characters', 'error');
+            passwordInput.focus();
+            return;
+        }
+
+        // Disable button during request
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Logging in...';
 
         try {
             const res = await fetch(`${API_URL}/auth/login`, {
@@ -53,21 +106,34 @@ function initAuthForms() {
                 body: JSON.stringify({ email, password })
             });
 
-            console.log('Login response status:', res.status);
             const data = await res.json();
-            console.log('Login response data:', data);
 
             if (res.ok) {
+                showNotification('Login successful! Welcome back 🎉', 'success');
                 token = data.token;
                 localStorage.setItem('token', token);
                 currentUser = data.user;
-                showMainApp();
+                
+                // Small delay for notification
+                setTimeout(() => {
+                    showMainApp();
+                }, 500);
             } else {
-                alert(data.message || 'Login failed');
+                // Handle specific errors
+                if (res.status === 400) {
+                    showNotification('Invalid email or password. Please try again.', 'error');
+                } else if (res.status === 500) {
+                    showNotification('Server error. Please try again later.', 'error');
+                } else {
+                    showNotification(data.message || 'Login failed', 'error');
+                }
             }
         } catch (err) {
             console.error('Login error:', err);
-            alert('Login failed: ' + err.message);
+            showNotification('Network error. Please check your connection.', 'error');
+        } finally {
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Login';
         }
     });
 
@@ -76,11 +142,42 @@ function initAuthForms() {
         e.preventDefault();
         console.log('📝 Register form submitted');
         
-        const name = document.getElementById('register-name').value;
-        const email = document.getElementById('register-email').value;
-        const password = document.getElementById('register-password').value;
+        const nameInput = document.getElementById('register-name');
+        const emailInput = document.getElementById('register-email');
+        const passwordInput = document.getElementById('register-password');
+        const submitBtn = registerForm.querySelector('button[type="submit"]');
+        
+        const name = nameInput.value.trim();
+        const email = emailInput.value.trim();
+        const password = passwordInput.value;
 
-        console.log('Registration attempt:', { name, email });
+        // Validation
+        if (!name || !email || !password) {
+            showNotification('Please fill in all fields', 'error');
+            return;
+        }
+
+        if (name.length < 2) {
+            showNotification('Name must be at least 2 characters', 'error');
+            nameInput.focus();
+            return;
+        }
+
+        if (!isValidEmail(email)) {
+            showNotification('Please enter a valid email address', 'error');
+            emailInput.focus();
+            return;
+        }
+
+        if (password.length < 6) {
+            showNotification('Password must be at least 6 characters', 'error');
+            passwordInput.focus();
+            return;
+        }
+
+        // Disable button during request
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Creating account...';
 
         try {
             const res = await fetch(`${API_URL}/auth/register`, {
@@ -89,21 +186,36 @@ function initAuthForms() {
                 body: JSON.stringify({ name, email, password })
             });
 
-            console.log('Register response status:', res.status);
             const data = await res.json();
-            console.log('Register response data:', data);
 
             if (res.ok) {
+                showNotification('Account created successfully! Welcome 🎉', 'success');
                 token = data.token;
                 localStorage.setItem('token', token);
                 currentUser = data.user;
-                showMainApp();
+                
+                // Small delay for notification
+                setTimeout(() => {
+                    showMainApp();
+                }, 500);
             } else {
-                alert(data.message || 'Registration failed');
+                // Handle specific errors
+                if (res.status === 400 && data.message.includes('already exists')) {
+                    showNotification('This email is already registered. Please login instead.', 'error');
+                    // Switch to login tab
+                    setTimeout(() => showLogin(), 2000);
+                } else if (res.status === 500) {
+                    showNotification('Server error. Please try again later.', 'error');
+                } else {
+                    showNotification(data.message || 'Registration failed', 'error');
+                }
             }
         } catch (err) {
             console.error('Registration error:', err);
-            alert('Registration failed: ' + err.message);
+            showNotification('Network error. Please check your connection.', 'error');
+        } finally {
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Register';
         }
     });
     
