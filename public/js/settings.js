@@ -8,21 +8,13 @@ console.log('🌐 Settings - API URL:', API_URL);
 let token = localStorage.getItem('token');
 let currentUser = null;
 
-console.log('🔑 Token exists:', !!token);
-console.log('🔑 Token value:', token ? token.substring(0, 20) + '...' : 'null');
+console.log('🔑 Settings.js - Token exists:', !!token);
 
 // Initialize
 document.addEventListener('DOMContentLoaded', async () => {
     console.log('📄 Settings page DOM loaded');
+    console.log('✅ Loading user profile and stats...');
     
-    // Check authentication after DOM loads
-    if (!token) {
-        console.log('❌ No token found, redirecting to login');
-        window.location.href = 'index.html';
-        return;
-    }
-    
-    console.log('✅ Token found, loading settings...');
     await loadUserProfile();
     await loadUserStats();
     setupForms();
