@@ -9,16 +9,20 @@ let token = localStorage.getItem('token');
 let currentUser = null;
 
 console.log('🔑 Token exists:', !!token);
-
-// Check authentication
-if (!token) {
-    console.log('❌ No token found, redirecting to login');
-    window.location.href = 'index.html';
-}
+console.log('🔑 Token value:', token ? token.substring(0, 20) + '...' : 'null');
 
 // Initialize
 document.addEventListener('DOMContentLoaded', async () => {
-    console.log('📄 Settings page loaded');
+    console.log('📄 Settings page DOM loaded');
+    
+    // Check authentication after DOM loads
+    if (!token) {
+        console.log('❌ No token found, redirecting to login');
+        window.location.href = 'index.html';
+        return;
+    }
+    
+    console.log('✅ Token found, loading settings...');
     await loadUserProfile();
     await loadUserStats();
     setupForms();
