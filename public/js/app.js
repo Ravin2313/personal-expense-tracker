@@ -222,6 +222,17 @@ function initAuthForms() {
     console.log('✅ Auth form listeners attached successfully');
 }
 
+// Make functions globally accessible for HTML onclick
+window.showLogin = showLogin;
+window.showRegister = showRegister;
+window.logout = logout;
+window.toggleSplitOptions = toggleSplitOptions;
+window.clearFilters = clearFilters;
+window.applyFilters = applyFilters;
+window.closeEditModal = closeEditModal;
+window.closeEditIncomeModal = closeEditIncomeModal;
+window.setBudgetAmount = setBudgetAmount;
+
 function showLogin() {
     document.getElementById('login-form').style.display = 'block';
     document.getElementById('register-form').style.display = 'none';
@@ -1043,6 +1054,14 @@ function setupBudgetModal() {
     console.log('=== BUDGET MODAL SETUP COMPLETE ===');
 }
 
+// Set budget amount from quick suggestions
+function setBudgetAmount(amount) {
+    const input = document.getElementById('budget-amount');
+    if (input) {
+        input.value = amount;
+        input.focus();
+    }
+}
 
 // Create animated particles
 function createParticles() {
