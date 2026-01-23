@@ -1036,7 +1036,7 @@ function setupBudgetModal() {
     console.log('Budget form:', form ? 'Found' : 'Not found');
     
     if (form) {
-        form.addEventListener('submit', (e) => {
+        form.addEventListener('submit', async (e) => {
             e.preventDefault();
             console.log('✅ Budget form submitted');
             
