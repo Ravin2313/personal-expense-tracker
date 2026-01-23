@@ -1,53 +1,75 @@
-// Auto-detect API URL
+// API Configuration
 const API_URL = window.location.hostname === 'localhost' 
     ? 'http://localhost:5000/api' 
     : `${window.location.origin}/api`;
 
-console.log('🌐 Settings - API URL:', API_URL);
-
 let token = localStorage.getItem('token');
 let currentUser = null;
 
-console.log('🔑 Settings.js - Token exists:', !!token);
+console.log('⚙️ Settings Page Loaded');
+console.log('🔑 Token:', token ? 'Found' : 'Not Found');
 
-// Initialize
-document.addEventListener('DOMContentLoaded', async () => {
-    console.log('📄 Settings page DOM loaded');
-    console.log('✅ Loading user profile and stats...');
+// Authentication Check
+if (!token) {
+    console.log('❌ No authentication token, redirecting...');
+    window.location.href = 'index.html';
+} else {
+    // Show settings section
+    document.getElementById('settings-section').style.display = 'block';
     
-    await loadUserProfile();
-    await loadUserStats();
-    setupForms();
-});
+    // Initialize when DOM is ready
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initSettings);
+    } else {
+        initSettings();
+    }
+}
 
-// Load user profile
-async function loadUserProfile() {
-    console.log('👤 Loading user profile...');
+// Initialize Settings Page
+async function initSettings() {
+    console.log('🚀 Initializing settings...');
+    
     try {
-        console.log('📤 Fetching:', `${API_URL}/auth/me`);
+        await loadUserProfile();
+        await loadUserStats();
+        setupForms();
+        createParticles();
+        console.log('✅ Settings initialized successfully');
+    } catch (err) {
+        console.error('❌ Error initializing settings:', err);
+        showNotification('Failed to load settings. Please refresh the page.', 'error');
+    }
+}
+
+// Load User Profile
+async function loadUserProfile() {
+    try {
+        console.log('👤 Loading user profile...');
+        
         const res = await fetch(`${API_URL}/auth/me`, {
             headers: { 'x-auth-token': token }
         });
 
-        console.log('📥 Response status:', res.status);
-
         if (!res.ok) {
             if (res.status === 401) {
-                console.error('❌ Unauthorized - Token invalid');
+                console.error('❌ Unauthorized - Invalid token');
                 localStorage.removeItem('token');
                 window.location.href = 'index.html';
                 return;
             }
-            throw new Error('Failed to load profile');
+            throw new Error(`HTTP ${res.status}`);
         }
 
         currentUser = await res.json();
-        console.log('✅ User profile loaded:', currentUser);
+        console.log('✅ Profile loaded:', currentUser.name);
         
         // Update UI
-        document.getElementById('user-name-display').textContent = currentUser.name;
-        document.getElementById('user-email-display').textContent = currentUser.email;
-        document.getElementById('user-join-date').textContent = new Date(currentUser.createdAt || Date.now()).toLocaleDateString();
+        document.getElementById('profile-name').textContent = currentUser.name;
+        document.getElementById('profile-email').textContent = currentUser.email;
+        document.getElementById('member-since').textContent = new Date(currentUser.createdAt || Date.now()).toLocaleDateString('en-US', {
+            month: 'short',
+            year: 'numeric'
+        });
         
         // Pre-fill edit form
         document.getElementById('edit-name').value = currentUser.name;
@@ -59,140 +81,174 @@ async function loadUserProfile() {
     }
 }
 
-// Load user stats
+// Load User Stats
 async function loadUserStats() {
     try {
-        // Load expenses count
+        console.log('📊 Loading user stats...');
+        
+        // Load expenses
         const expensesRes = await fetch(`${API_URL}/expenses`, {
             headers: { 'x-auth-token': token }
         });
         if (expensesRes.ok) {
             const expenses = await expensesRes.json();
-            document.getElementById('total-expenses-count').textContent = expenses.length;
+            document.getElementById('total-expenses').textContent = expenses.length;
         }
 
-        // Load income count
+        // Load income
         const incomeRes = await fetch(`${API_URL}/income`, {
             headers: { 'x-auth-token': token }
         });
         if (incomeRes.ok) {
             const income = await incomeRes.json();
-            document.getElementById('total-income-count').textContent = income.length;
+            document.getElementById('total-income').textContent = income.length;
         }
 
-        // Load budgets count
+        // Load budgets
         const now = new Date();
         const budgetsRes = await fetch(`${API_URL}/budgets/${now.getMonth() + 1}/${now.getFullYear()}`, {
             headers: { 'x-auth-token': token }
         });
         if (budgetsRes.ok) {
             const budgets = await budgetsRes.json();
-            document.getElementById('budgets-set-count').textContent = budgets.length;
+            document.getElementById('budgets-count').textContent = budgets.length;
         }
+        
+        console.log('✅ Stats loaded');
     } catch (err) {
-        console.error('Error loading stats:', err);
+        console.error('❌ Error loading stats:', err);
     }
 }
 
-// Setup forms
+// Setup Forms
 function setupForms() {
-    // Change password form
-    document.getElementById('change-password-form').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        
-        const currentPassword = document.getElementById('current-password').value;
-        const newPassword = document.getElementById('new-password').value;
-        const confirmPassword = document.getElementById('confirm-password').value;
+    // Edit Profile Form
+    const editForm = document.getElementById('edit-profile-form');
+    if (editForm) {
+        editForm.addEventListener('submit', handleProfileUpdate);
+    }
 
-        // Validation
-        if (newPassword !== confirmPassword) {
-            showNotification('New passwords do not match', 'error');
-            return;
-        }
-
-        if (newPassword.length < 6) {
-            showNotification('Password must be at least 6 characters', 'error');
-            return;
-        }
-
-        try {
-            const res = await fetch(`${API_URL}/auth/change-password`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'x-auth-token': token
-                },
-                body: JSON.stringify({ currentPassword, newPassword })
-            });
-
-            const data = await res.json();
-
-            if (res.ok) {
-                showNotification('Password changed successfully! 🎉', 'success');
-                document.getElementById('change-password-form').reset();
-            } else {
-                showNotification(data.message || 'Failed to change password', 'error');
-            }
-        } catch (err) {
-            console.error('Error changing password:', err);
-            showNotification('Network error. Please try again.', 'error');
-        }
-    });
-
-    // Edit profile form
-    document.getElementById('edit-profile-form').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        
-        const name = document.getElementById('edit-name').value.trim();
-
-        if (name.length < 2) {
-            showNotification('Name must be at least 2 characters', 'error');
-            return;
-        }
-
-        try {
-            const res = await fetch(`${API_URL}/auth/profile`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'x-auth-token': token
-                },
-                body: JSON.stringify({ name })
-            });
-
-            const data = await res.json();
-
-            if (res.ok) {
-                showNotification('Profile updated successfully! 🎉', 'success');
-                currentUser = data.user;
-                document.getElementById('user-name-display').textContent = name;
-            } else {
-                showNotification(data.message || 'Failed to update profile', 'error');
-            }
-        } catch (err) {
-            console.error('Error updating profile:', err);
-            showNotification('Network error. Please try again.', 'error');
-        }
-    });
+    // Change Password Form
+    const passwordForm = document.getElementById('change-password-form');
+    if (passwordForm) {
+        passwordForm.addEventListener('submit', handlePasswordChange);
+    }
 }
 
-// Show notification
+// Handle Profile Update
+async function handleProfileUpdate(e) {
+    e.preventDefault();
+    
+    const name = document.getElementById('edit-name').value.trim();
+    const submitBtn = e.target.querySelector('button[type="submit"]');
+
+    if (name.length < 2) {
+        showNotification('Name must be at least 2 characters', 'error');
+        return;
+    }
+
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<i class="bi bi-hourglass-split"></i> Saving...';
+
+    try {
+        const res = await fetch(`${API_URL}/auth/profile`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'x-auth-token': token
+            },
+            body: JSON.stringify({ name })
+        });
+
+        const data = await res.json();
+
+        if (res.ok) {
+            currentUser = data.user;
+            document.getElementById('profile-name').textContent = name;
+            showNotification('Profile updated successfully! 🎉', 'success');
+        } else {
+            showNotification(data.message || 'Failed to update profile', 'error');
+        }
+    } catch (err) {
+        console.error('Error updating profile:', err);
+        showNotification('Network error. Please try again.', 'error');
+    } finally {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '<i class="bi bi-check-circle"></i> Save Changes';
+    }
+}
+
+// Handle Password Change
+async function handlePasswordChange(e) {
+    e.preventDefault();
+    
+    const currentPassword = document.getElementById('current-password').value;
+    const newPassword = document.getElementById('new-password').value;
+    const confirmPassword = document.getElementById('confirm-password').value;
+    const submitBtn = e.target.querySelector('button[type="submit"]');
+
+    // Validation
+    if (newPassword !== confirmPassword) {
+        showNotification('New passwords do not match', 'error');
+        return;
+    }
+
+    if (newPassword.length < 6) {
+        showNotification('Password must be at least 6 characters', 'error');
+        return;
+    }
+
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<i class="bi bi-hourglass-split"></i> Updating...';
+
+    try {
+        const res = await fetch(`${API_URL}/auth/change-password`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'x-auth-token': token
+            },
+            body: JSON.stringify({ currentPassword, newPassword })
+        });
+
+        const data = await res.json();
+
+        if (res.ok) {
+            showNotification('Password changed successfully! 🎉', 'success');
+            e.target.reset();
+        } else {
+            showNotification(data.message || 'Failed to change password', 'error');
+        }
+    } catch (err) {
+        console.error('Error changing password:', err);
+        showNotification('Network error. Please try again.', 'error');
+    } finally {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '<i class="bi bi-shield-check"></i> Update Password';
+    }
+}
+
+// Show Notification
 function showNotification(message, type = 'info') {
-    const existing = document.querySelector('.notification');
-    if (existing) existing.remove();
+    const container = document.getElementById('notification-container');
     
     const notification = document.createElement('div');
-    notification.className = `notification notification-${type}`;
+    notification.className = `notification-toast notification-${type}`;
+    
+    const icon = type === 'success' ? 'check-circle-fill' : 
+                 type === 'error' ? 'x-circle-fill' : 'info-circle-fill';
+    
     notification.innerHTML = `
-        <i class="bi ${type === 'success' ? 'bi-check-circle' : type === 'error' ? 'bi-x-circle' : 'bi-info-circle'}"></i>
+        <i class="bi bi-${icon}"></i>
         <span>${message}</span>
+        <button class="notification-close" onclick="this.parentElement.remove()">
+            <i class="bi bi-x"></i>
+        </button>
     `;
     
-    document.body.appendChild(notification);
+    container.appendChild(notification);
     
-    setTimeout(() => {
-        notification.classList.add('show');
-    }, 10);
+    setTimeout(() => notification.classList.add('show'), 10);
     
     setTimeout(() => {
         notification.classList.remove('show');
@@ -201,14 +257,16 @@ function showNotification(message, type = 'info') {
 }
 
 // Logout
-function logout() {
-    localStorage.removeItem('token');
-    window.location.href = 'index.html';
+function logoutUser() {
+    if (confirm('Are you sure you want to logout?')) {
+        localStorage.removeItem('token');
+        window.location.href = 'index.html';
+    }
 }
 
-// Create particles
+// Create Particles
 function createParticles() {
-    const particlesContainer = document.getElementById('particles');
+    const particlesContainer = document.querySelector('.particles');
     if (!particlesContainer) return;
     
     const particleCount = 50;
@@ -230,5 +288,3 @@ function createParticles() {
         particlesContainer.appendChild(particle);
     }
 }
-
-createParticles();
