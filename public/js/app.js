@@ -2,6 +2,10 @@
 const API_URL = window.location.hostname === 'localhost' 
     ? 'http://localhost:5000/api' 
     : `${window.location.origin}/api`;
+
+console.log('🌐 API URL:', API_URL);
+console.log('🔗 Current Origin:', window.location.origin);
+
 let token = localStorage.getItem('token');
 let currentUser = null;
 let allExpenses = []; // Store all expenses for filtering
@@ -99,6 +103,9 @@ function initAuthForms() {
         submitBtn.disabled = true;
         submitBtn.textContent = 'Logging in...';
 
+        console.log('📤 Sending login request to:', `${API_URL}/auth/login`);
+        console.log('📦 Data:', { email, password: '***' });
+
         try {
             const res = await fetch(`${API_URL}/auth/login`, {
                 method: 'POST',
@@ -106,19 +113,26 @@ function initAuthForms() {
                 body: JSON.stringify({ email, password })
             });
 
+            console.log('📥 Response status:', res.status);
+            console.log('📥 Response ok:', res.ok);
+            
             const data = await res.json();
+            console.log('📥 Response data:', data);
 
             if (res.ok) {
+                console.log('✅ Login successful!');
                 showNotification('Login successful! Welcome back 🎉', 'success');
                 token = data.token;
                 localStorage.setItem('token', token);
                 currentUser = data.user;
+                console.log('👤 Current user:', currentUser);
                 
                 // Small delay for notification
                 setTimeout(() => {
                     showMainApp();
                 }, 500);
             } else {
+                console.error('❌ Login failed:', data.message);
                 // Handle specific errors
                 if (res.status === 400) {
                     showNotification('Invalid email or password. Please try again.', 'error');
@@ -129,7 +143,8 @@ function initAuthForms() {
                 }
             }
         } catch (err) {
-            console.error('Login error:', err);
+            console.error('❌ Login error:', err);
+            console.error('Error details:', err.message);
             showNotification('Network error. Please check your connection.', 'error');
         } finally {
             submitBtn.disabled = false;
@@ -179,6 +194,9 @@ function initAuthForms() {
         submitBtn.disabled = true;
         submitBtn.textContent = 'Creating account...';
 
+        console.log('📤 Sending registration request to:', `${API_URL}/auth/register`);
+        console.log('📦 Data:', { name, email, password: '***' });
+
         try {
             const res = await fetch(`${API_URL}/auth/register`, {
                 method: 'POST',
@@ -186,19 +204,26 @@ function initAuthForms() {
                 body: JSON.stringify({ name, email, password })
             });
 
+            console.log('📥 Response status:', res.status);
+            console.log('📥 Response ok:', res.ok);
+            
             const data = await res.json();
+            console.log('📥 Response data:', data);
 
             if (res.ok) {
+                console.log('✅ Registration successful!');
                 showNotification('Account created successfully! Welcome 🎉', 'success');
                 token = data.token;
                 localStorage.setItem('token', token);
                 currentUser = data.user;
+                console.log('👤 Current user:', currentUser);
                 
                 // Small delay for notification
                 setTimeout(() => {
                     showMainApp();
                 }, 500);
             } else {
+                console.error('❌ Registration failed:', data.message);
                 // Handle specific errors
                 if (res.status === 400 && data.message.includes('already exists')) {
                     showNotification('This email is already registered. Please login instead.', 'error');
@@ -211,7 +236,8 @@ function initAuthForms() {
                 }
             }
         } catch (err) {
-            console.error('Registration error:', err);
+            console.error('❌ Registration error:', err);
+            console.error('Error details:', err.message);
             showNotification('Network error. Please check your connection.', 'error');
         } finally {
             submitBtn.disabled = false;
