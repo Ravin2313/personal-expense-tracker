@@ -52,8 +52,10 @@ router.post('/monthly', auth, async (req, res) => {
       budget.amount = amount;
       if (alertSettings) {
         budget.alertSettings = {
-          ...budget.alertSettings,
-          ...alertSettings
+          enabled: alertSettings.enabled !== undefined ? alertSettings.enabled : budget.alertSettings.enabled,
+          threshold80: alertSettings.threshold80 !== undefined ? alertSettings.threshold80 : budget.alertSettings.threshold80,
+          threshold100: alertSettings.threshold100 !== undefined ? alertSettings.threshold100 : budget.alertSettings.threshold100,
+          dailyLimit: alertSettings.dailyLimit !== undefined ? alertSettings.dailyLimit : budget.alertSettings.dailyLimit
         };
       }
       await budget.save();
@@ -95,13 +97,30 @@ router.put('/alert-settings/:month/:year', auth, async (req, res) => {
     });
 
     if (!budget) {
-      return res.status(404).json({ message: 'Budget not found. Please set a budget first.' });
+      // Create a new budget with default amount if it doesn't exist
+      budget = new Budget({
+        user: req.user.id,
+        category: 'monthly',
+        amount: 0, // Default amount, user can set it later
+        month: parseInt(month),
+        year: parseInt(year),
+        alertSettings: alertSettings || {
+          enabled: true,
+          threshold80: true,
+          threshold100: true,
+          dailyLimit: 0
+        }
+      });
+    } else {
+      // Update existing budget's alert settings properly
+      budget.alertSettings = {
+        enabled: alertSettings.enabled !== undefined ? alertSettings.enabled : budget.alertSettings.enabled,
+        threshold80: alertSettings.threshold80 !== undefined ? alertSettings.threshold80 : budget.alertSettings.threshold80,
+        threshold100: alertSettings.threshold100 !== undefined ? alertSettings.threshold100 : budget.alertSettings.threshold100,
+        dailyLimit: alertSettings.dailyLimit !== undefined ? alertSettings.dailyLimit : budget.alertSettings.dailyLimit
+      };
     }
-
-    budget.alertSettings = {
-      ...budget.alertSettings,
-      ...alertSettings
-    };
+    
     await budget.save();
 
     res.json(budget);
