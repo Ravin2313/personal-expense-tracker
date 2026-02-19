@@ -21,7 +21,7 @@ if (!token) {
 async function checkAdminAccess() {
     try {
         const res = await fetch(`${API_URL}/auth/me`, {
-            headers: { 'x-auth-token': token }
+            headers: { 'Authorization': `Bearer ${token}` }
         });
 
         if (!res.ok) {
@@ -63,7 +63,7 @@ async function initAdmin() {
 async function loadDashboard() {
     try {
         const res = await fetch(`${API_URL}/admin/stats`, {
-            headers: { 'x-auth-token': token }
+            headers: { 'Authorization': `Bearer ${token}` }
         });
 
         if (!res.ok) throw new Error('Failed to load stats');
@@ -129,7 +129,7 @@ async function loadUsers(page = 1, search = '') {
     try {
         currentPage = page;
         const res = await fetch(`${API_URL}/admin/users?page=${page}&limit=10&search=${search}`, {
-            headers: { 'x-auth-token': token }
+            headers: { 'Authorization': `Bearer ${token}` }
         });
 
         if (!res.ok) throw new Error('Failed to load users');
@@ -189,7 +189,7 @@ async function loadUsers(page = 1, search = '') {
 async function viewUserDetails(userId) {
     try {
         const res = await fetch(`${API_URL}/admin/users/${userId}`, {
-            headers: { 'x-auth-token': token }
+            headers: { 'Authorization': `Bearer ${token}` }
         });
 
         if (!res.ok) throw new Error('Failed to load user details');
@@ -264,7 +264,7 @@ async function resetUserPassword(userId, userName) {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
-                'x-auth-token': token
+                'Authorization': `Bearer ${token}`
             },
             body: JSON.stringify({ newPassword })
         });
@@ -291,7 +291,7 @@ async function toggleUserRole(userId, currentRole) {
     try {
         const res = await fetch(`${API_URL}/admin/users/${userId}/toggle-role`, {
             method: 'PUT',
-            headers: { 'x-auth-token': token }
+            headers: { 'Authorization': `Bearer ${token}` }
         });
 
         const data = await res.json();
@@ -315,7 +315,7 @@ async function deleteUser(userId, userName) {
     try {
         const res = await fetch(`${API_URL}/admin/users/${userId}`, {
             method: 'DELETE',
-            headers: { 'x-auth-token': token }
+            headers: { 'Authorization': `Bearer ${token}` }
         });
 
         const data = await res.json();
@@ -337,7 +337,7 @@ async function deleteUser(userId, userName) {
 async function loadActivity() {
     try {
         const res = await fetch(`${API_URL}/admin/activity?limit=50`, {
-            headers: { 'x-auth-token': token }
+            headers: { 'Authorization': `Bearer ${token}` }
         });
 
         if (!res.ok) throw new Error('Failed to load activity');
@@ -475,7 +475,7 @@ async function migrateExistingUsers() {
     try {
         const res = await fetch(`${API_URL}/admin/migrate-users`, {
             method: 'POST',
-            headers: { 'x-auth-token': token }
+            headers: { 'Authorization': `Bearer ${token}` }
         });
 
         const data = await res.json();
