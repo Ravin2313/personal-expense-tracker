@@ -127,10 +127,18 @@ function initAuthForms() {
                 currentUser = data.user;
                 console.log('👤 Current user:', currentUser);
                 
-                // Small delay for notification
-                setTimeout(() => {
-                    showMainApp();
-                }, 500);
+                // Check if user is admin and redirect to admin panel
+                if (currentUser.role === 'admin') {
+                    console.log('🔐 Admin user detected, redirecting to admin panel...');
+                    setTimeout(() => {
+                        window.location.href = 'admin.html';
+                    }, 500);
+                } else {
+                    // Regular user - show main app
+                    setTimeout(() => {
+                        showMainApp();
+                    }, 500);
+                }
             } else {
                 console.error('❌ Login failed:', data.message);
                 // Handle specific errors
@@ -228,10 +236,18 @@ function initAuthForms() {
                 currentUser = data.user;
                 console.log('👤 Current user:', currentUser);
                 
-                // Small delay for notification
-                setTimeout(() => {
-                    showMainApp();
-                }, 500);
+                // Check if user is admin and redirect to admin panel
+                if (currentUser.role === 'admin') {
+                    console.log('🔐 Admin user detected, redirecting to admin panel...');
+                    setTimeout(() => {
+                        window.location.href = 'admin.html';
+                    }, 500);
+                } else {
+                    // Regular user - show main app
+                    setTimeout(() => {
+                        showMainApp();
+                    }, 500);
+                }
             } else {
                 console.error('❌ Registration failed:', data.message);
                 // Handle specific errors
