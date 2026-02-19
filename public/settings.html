@@ -171,6 +171,64 @@
                             </div>
                         </div>
 
+                        <!-- Security Question Section -->
+                        <div class="settings-section-card">
+                            <div class="section-header">
+                                <div class="section-title">
+                                    <i class="bi bi-question-circle-fill"></i>
+                                    <h4>Security Question</h4>
+                                </div>
+                                <span class="badge-status">For Password Recovery</span>
+                            </div>
+                            <div class="section-body">
+                                <div class="telegram-info-box" style="margin-bottom: 20px;">
+                                    <div class="info-icon">
+                                        <i class="bi bi-shield-check"></i>
+                                    </div>
+                                    <div class="info-content">
+                                        <h5>Current Security Question</h5>
+                                        <p id="current-security-question" style="font-weight: 600; color: #8b5cf6;">Loading...</p>
+                                    </div>
+                                </div>
+                                
+                                <form id="update-security-form" class="settings-form">
+                                    <div class="form-group-modern">
+                                        <label>
+                                            <i class="bi bi-question-circle"></i>
+                                            New Security Question
+                                        </label>
+                                        <select id="new-security-question" required>
+                                            <option value="">Select Security Question</option>
+                                            <option value="What is your mother's maiden name?">What is your mother's maiden name?</option>
+                                            <option value="What was the name of your first pet?">What was the name of your first pet?</option>
+                                            <option value="What city were you born in?">What city were you born in?</option>
+                                            <option value="What is your favorite movie?">What is your favorite movie?</option>
+                                            <option value="What was your childhood nickname?">What was your childhood nickname?</option>
+                                            <option value="What is your favorite food?">What is your favorite food?</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group-modern">
+                                        <label>
+                                            <i class="bi bi-chat-left-text"></i>
+                                            New Answer
+                                        </label>
+                                        <input type="text" id="new-security-answer" placeholder="Enter your answer" required>
+                                        <small>Answer is case-insensitive</small>
+                                    </div>
+                                    <div class="form-group-modern">
+                                        <label>
+                                            <i class="bi bi-lock"></i>
+                                            Current Password (for verification)
+                                        </label>
+                                        <input type="password" id="security-current-password" placeholder="Enter current password" required>
+                                    </div>
+                                    <button type="submit" class="btn-save">
+                                        <i class="bi bi-check-circle"></i> Update Security Question
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+
                         <!-- Telegram Settings Section -->
                         <div class="settings-section-card">
                             <div class="section-header">

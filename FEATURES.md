@@ -124,6 +124,8 @@
 - ✅ Password hashing
 - ✅ Protected routes
 - ✅ Session management
+- ✅ Simple forgot password (email + new password)
+- ✅ Password reset without email verification
 
 ### 11. 🔍 Search & Filter
 - ✅ Real-time search

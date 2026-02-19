@@ -31,6 +31,11 @@
                     <input type="email" id="login-email" placeholder="Email" required>
                     <input type="password" id="login-password" placeholder="Password" required>
                     <button type="submit">Login</button>
+                    <div style="text-align: center; margin-top: 15px;">
+                        <a href="forgot-password.html" style="color: #8b5cf6; text-decoration: none; font-size: 14px;">
+                            <i class="bi bi-key"></i> Forgot Password?
+                        </a>
+                    </div>
                 </form>
 
                 <!-- Register Form -->
@@ -38,6 +43,19 @@
                     <input type="text" id="register-name" placeholder="Name" required>
                     <input type="email" id="register-email" placeholder="Email" required>
                     <input type="password" id="register-password" placeholder="Password" required>
+                    
+                    <select id="register-security-question" required style="padding: 12px; border-radius: 8px; border: 1px solid rgba(139, 92, 246, 0.3); background: rgba(17, 17, 27, 0.6); color: white; margin-top: 10px;">
+                        <option value="">Select Security Question</option>
+                        <option value="What is your mother's maiden name?">What is your mother's maiden name?</option>
+                        <option value="What was the name of your first pet?">What was the name of your first pet?</option>
+                        <option value="What city were you born in?">What city were you born in?</option>
+                        <option value="What is your favorite movie?">What is your favorite movie?</option>
+                        <option value="What was your childhood nickname?">What was your childhood nickname?</option>
+                        <option value="What is your favorite food?">What is your favorite food?</option>
+                    </select>
+                    
+                    <input type="text" id="register-security-answer" placeholder="Security Answer" required style="margin-top: 10px;">
+                    
                     <button type="submit">Register</button>
                 </form>
             </div>

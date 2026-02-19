@@ -160,14 +160,18 @@ function initAuthForms() {
         const nameInput = document.getElementById('register-name');
         const emailInput = document.getElementById('register-email');
         const passwordInput = document.getElementById('register-password');
+        const securityQuestionInput = document.getElementById('register-security-question');
+        const securityAnswerInput = document.getElementById('register-security-answer');
         const submitBtn = registerForm.querySelector('button[type="submit"]');
         
         const name = nameInput.value.trim();
         const email = emailInput.value.trim();
         const password = passwordInput.value;
+        const securityQuestion = securityQuestionInput.value;
+        const securityAnswer = securityAnswerInput.value.trim();
 
         // Validation
-        if (!name || !email || !password) {
+        if (!name || !email || !password || !securityQuestion || !securityAnswer) {
             showNotification('Please fill in all fields', 'error');
             return;
         }
@@ -190,18 +194,24 @@ function initAuthForms() {
             return;
         }
 
+        if (securityAnswer.length < 2) {
+            showNotification('Security answer must be at least 2 characters', 'error');
+            securityAnswerInput.focus();
+            return;
+        }
+
         // Disable button during request
         submitBtn.disabled = true;
         submitBtn.textContent = 'Creating account...';
 
         console.log('📤 Sending registration request to:', `${API_URL}/auth/register`);
-        console.log('📦 Data:', { name, email, password: '***' });
+        console.log('📦 Data:', { name, email, password: '***', securityQuestion, securityAnswer: '***' });
 
         try {
             const res = await fetch(`${API_URL}/auth/register`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ name, email, password })
+                body: JSON.stringify({ name, email, password, securityQuestion, securityAnswer })
             });
 
             console.log('📥 Response status:', res.status);

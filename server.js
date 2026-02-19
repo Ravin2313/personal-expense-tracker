@@ -44,6 +44,7 @@ app.use('/api/splits', require('./routes/splits'));
 app.use('/api/friends', require('./routes/friends'));
 app.use('/api/splitExpenses', require('./routes/splitExpenses'));
 app.use('/api/telegram', require('./routes/telegram'));
+app.use('/api/admin', require('./routes/admin'));
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

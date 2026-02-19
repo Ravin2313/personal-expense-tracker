@@ -200,6 +200,10 @@ Automated reports and notifications via Telegram:
 - ✅ Protected API routes
 - ✅ Session management
 - ✅ User-specific data isolation
+- ✅ **Simple Forgot Password**
+  - Direct password reset with email
+  - No email verification needed
+  - Quick and easy recovery
 
 ### 🔍 **Advanced Search & Filter**
 - ✅ Real-time search by description or amount

@@ -75,6 +75,9 @@ async function loadUserProfile() {
         document.getElementById('edit-name').value = currentUser.name;
         document.getElementById('edit-email').value = currentUser.email;
         
+        // Show current security question
+        document.getElementById('current-security-question').textContent = currentUser.securityQuestion || 'Not set';
+        
     } catch (err) {
         console.error('❌ Error loading profile:', err);
         showNotification('Failed to load profile', 'error');
@@ -132,6 +135,12 @@ function setupForms() {
     const passwordForm = document.getElementById('change-password-form');
     if (passwordForm) {
         passwordForm.addEventListener('submit', handlePasswordChange);
+    }
+
+    // Update Security Question Form
+    const securityForm = document.getElementById('update-security-form');
+    if (securityForm) {
+        securityForm.addEventListener('submit', handleSecurityQuestionUpdate);
     }
 }
 
@@ -225,6 +234,57 @@ async function handlePasswordChange(e) {
     } finally {
         submitBtn.disabled = false;
         submitBtn.innerHTML = '<i class="bi bi-shield-check"></i> Update Password';
+    }
+}
+
+// Handle Security Question Update
+async function handleSecurityQuestionUpdate(e) {
+    e.preventDefault();
+    
+    const securityQuestion = document.getElementById('new-security-question').value;
+    const securityAnswer = document.getElementById('new-security-answer').value.trim();
+    const currentPassword = document.getElementById('security-current-password').value;
+    const submitBtn = e.target.querySelector('button[type="submit"]');
+
+    // Validation
+    if (!securityQuestion) {
+        showNotification('Please select a security question', 'error');
+        return;
+    }
+
+    if (securityAnswer.length < 2) {
+        showNotification('Security answer must be at least 2 characters', 'error');
+        return;
+    }
+
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<i class="bi bi-hourglass-split"></i> Updating...';
+
+    try {
+        const res = await fetch(`${API_URL}/auth/security-question`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'x-auth-token': token
+            },
+            body: JSON.stringify({ securityQuestion, securityAnswer, currentPassword })
+        });
+
+        const data = await res.json();
+
+        if (res.ok) {
+            showNotification('Security question updated successfully! 🎉', 'success');
+            document.getElementById('current-security-question').textContent = data.securityQuestion;
+            e.target.reset();
+        } else {
+            showNotification(data.message || 'Failed to update security question', 'error');
+        }
+    } catch (err) {
+        console.error('Error updating security question:', err);
+        showNotification('Network error. Please try again.', 'error');
+    } finally {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '<i class="bi bi-check-circle"></i> Update Security Question';
     }
 }
 
