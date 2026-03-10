@@ -44,6 +44,11 @@ async function loadBalanceSummary() {
         const res = await fetch(`${API_URL}/friends/balance-summary`, {
             headers: { 'Authorization': `Bearer ${token}` }
         });
+        
+        if (!res.ok) {
+            throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+        }
+        
         const data = await res.json();
         
         document.getElementById('total-owed').textContent = `₹${data.totalOwed.toFixed(0)}`;
@@ -61,7 +66,10 @@ async function loadBalanceSummary() {
             netCard.classList.remove('positive');
         }
     } catch (err) {
-        console.error('Failed to load balance summary', err);
+        console.error('Failed to load balance summary:', err);
+        document.getElementById('total-owed').textContent = '₹0';
+        document.getElementById('total-owing').textContent = '₹0';
+        document.getElementById('net-balance').textContent = '₹0';
     }
 }
 
@@ -71,10 +79,17 @@ async function loadFriends() {
         const res = await fetch(`${API_URL}/friends`, {
             headers: { 'Authorization': `Bearer ${token}` }
         });
+        
+        if (!res.ok) {
+            throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+        }
+        
         friends = await res.json();
         displayFriends();
     } catch (err) {
-        console.error('Failed to load friends', err);
+        console.error('Failed to load friends:', err);
+        const list = document.getElementById('friends-list');
+        list.innerHTML = `<p class="empty-state" style="color: #ef4444;"><i class="bi bi-exclamation-triangle"></i> Failed to load friends. Please refresh the page.</p>`;
     }
 }
 
@@ -134,10 +149,17 @@ async function loadSplits() {
         const res = await fetch(`${API_URL}/splitExpenses/unsettled`, {
             headers: { 'Authorization': `Bearer ${token}` }
         });
+        
+        if (!res.ok) {
+            throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+        }
+        
         splits = await res.json();
         displaySplits();
     } catch (err) {
-        console.error('Failed to load splits', err);
+        console.error('Failed to load splits:', err);
+        const list = document.getElementById('splits-list');
+        list.innerHTML = `<p class="empty-state" style="color: #ef4444;"><i class="bi bi-exclamation-triangle"></i> Failed to load split expenses. Please refresh the page.</p>`;
     }
 }
 

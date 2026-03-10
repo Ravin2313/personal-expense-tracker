@@ -133,19 +133,101 @@
                     <div class="card" style="margin-bottom: 20px;">
                         <div class="card-header-custom">
                             <h3><i class="bi bi-calendar-month"></i> View Data For</h3>
-                            <div style="display: flex; gap: 15px; align-items: center;">
-                                <select id="month-selector" class="modern-input" style="width: 150px;" onchange="loadStatsForMonth()">
+                            <div class="month-selector-controls">
+                                <select id="month-selector" class="modern-input month-select" onchange="loadStatsForMonth()">
                                     <!-- Options will be populated by JS -->
                                 </select>
-                                <select id="year-selector" class="modern-input" style="width: 100px;" onchange="loadStatsForMonth()">
+                                <select id="year-selector" class="modern-input year-select" onchange="loadStatsForMonth()">
                                     <!-- Options will be populated by JS -->
                                 </select>
-                                <button class="btn-modern btn-primary" onclick="resetToCurrentMonth()" style="padding: 8px 16px; font-size: 14px;">
-                                    <i class="bi bi-arrow-clockwise"></i> Current
+                                <button class="btn-modern btn-primary current-btn" onclick="resetToCurrentMonth()">
+                                    <i class="bi bi-arrow-clockwise"></i> <span class="btn-text">Current</span>
                                 </button>
                             </div>
                         </div>
                     </div>
+                    
+                    <!-- Mobile Responsive Styles -->
+                    <style>
+                        .month-selector-controls {
+                            display: flex;
+                            gap: 15px;
+                            align-items: center;
+                            flex-wrap: wrap;
+                        }
+                        
+                        .month-select {
+                            width: 150px;
+                            min-width: 120px;
+                        }
+                        
+                        .year-select {
+                            width: 100px;
+                            min-width: 80px;
+                        }
+                        
+                        .current-btn {
+                            padding: 8px 16px;
+                            font-size: 14px;
+                            white-space: nowrap;
+                        }
+                        
+                        @media (max-width: 768px) {
+                            .card-header-custom {
+                                flex-direction: column;
+                                align-items: flex-start;
+                                gap: 15px;
+                            }
+                            
+                            .month-selector-controls {
+                                width: 100%;
+                                justify-content: space-between;
+                                gap: 10px;
+                            }
+                            
+                            .month-select {
+                                flex: 1;
+                                min-width: 100px;
+                                width: auto;
+                            }
+                            
+                            .year-select {
+                                width: 80px;
+                                min-width: 70px;
+                            }
+                            
+                            .current-btn {
+                                padding: 8px 12px;
+                                font-size: 12px;
+                            }
+                            
+                            .btn-text {
+                                display: none;
+                            }
+                        }
+                        
+                        @media (max-width: 480px) {
+                            .month-selector-controls {
+                                flex-direction: column;
+                                align-items: stretch;
+                                gap: 12px;
+                            }
+                            
+                            .month-select,
+                            .year-select {
+                                width: 100%;
+                            }
+                            
+                            .current-btn {
+                                width: 100%;
+                                justify-content: center;
+                            }
+                            
+                            .btn-text {
+                                display: inline;
+                            }
+                        }
+                    </style>
                     
                     <!-- Stats Cards -->
                     <div class="stats-grid">
