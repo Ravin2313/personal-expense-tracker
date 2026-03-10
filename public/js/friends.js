@@ -9,19 +9,31 @@ let splits = [];
 
 // Check authentication
 if (!token) {
+    console.log('❌ No token found, redirecting to login');
     window.location.href = 'index.html';
 }
+
+console.log('🔐 Token found:', token ? 'Yes' : 'No');
+console.log('🌐 API URL:', API_URL);
 
 fetch(`${API_URL}/auth/me`, {
     headers: { 'Authorization': `Bearer ${token}` }
 })
-.then(res => res.json())
+.then(res => {
+    console.log('📥 Auth response status:', res.status);
+    if (!res.ok) {
+        throw new Error(`HTTP ${res.status}`);
+    }
+    return res.json();
+})
 .then(user => {
+    console.log('✅ User authenticated:', user);
     currentUser = user;
     document.getElementById('user-name').textContent = user.name;
     loadData();
 })
-.catch(() => {
+.catch(err => {
+    console.error('❌ Auth failed:', err);
     localStorage.removeItem('token');
     window.location.href = 'index.html';
 });
@@ -33,9 +45,15 @@ function logout() {
 
 // Load all data
 async function loadData() {
-    await loadBalanceSummary();
-    await loadFriends();
-    await loadSplits();
+    console.log('📊 Loading friends data...');
+    try {
+        await loadBalanceSummary();
+        await loadFriends();
+        await loadSplits();
+        console.log('✅ All data loaded successfully');
+    } catch (err) {
+        console.error('❌ Error loading data:', err);
+    }
 }
 
 // Load balance summary
@@ -75,21 +93,27 @@ async function loadBalanceSummary() {
 
 // Load friends
 async function loadFriends() {
+    console.log('👥 Loading friends...');
     try {
         const res = await fetch(`${API_URL}/friends`, {
             headers: { 'Authorization': `Bearer ${token}` }
         });
         
+        console.log('📥 Friends API response status:', res.status);
+        
         if (!res.ok) {
+            const errorText = await res.text();
+            console.error('❌ Friends API error:', errorText);
             throw new Error(`HTTP ${res.status}: ${res.statusText}`);
         }
         
         friends = await res.json();
+        console.log('✅ Friends loaded:', friends.length, 'friends');
         displayFriends();
     } catch (err) {
-        console.error('Failed to load friends:', err);
+        console.error('❌ Failed to load friends:', err);
         const list = document.getElementById('friends-list');
-        list.innerHTML = `<p class="empty-state" style="color: #ef4444;"><i class="bi bi-exclamation-triangle"></i> Failed to load friends. Please refresh the page.</p>`;
+        list.innerHTML = `<p class="empty-state" style="color: #ef4444;"><i class="bi bi-exclamation-triangle"></i> Failed to load friends: ${err.message}<br><small>Check console for details</small></p>`;
     }
 }
 
@@ -220,9 +244,16 @@ document.getElementById('close-friend-modal').addEventListener('click', () => {
 document.getElementById('add-friend-form').addEventListener('submit', async (e) => {
     e.preventDefault();
     
-    const name = document.getElementById('friend-name').value;
-    const email = document.getElementById('friend-email').value;
-    const phone = document.getElementById('friend-phone').value;
+    const name = document.getElementById('friend-name').value.trim();
+    const email = document.getElementById('friend-email').value.trim();
+    const phone = document.getElementById('friend-phone').value.trim();
+    
+    console.log('➕ Adding friend:', { name, email, phone });
+    
+    if (!name) {
+        alert('Friend name is required');
+        return;
+    }
     
     try {
         const res = await fetch(`${API_URL}/friends`, {
@@ -233,22 +264,28 @@ document.getElementById('add-friend-form').addEventListener('submit', async (e) 
             },
             body: JSON.stringify({
                 friendName: name,
-                friendEmail: email,
-                friendPhone: phone
+                friendEmail: email || undefined,
+                friendPhone: phone || undefined
             })
         });
         
+        console.log('📥 Add friend response status:', res.status);
+        
         if (res.ok) {
+            const newFriend = await res.json();
+            console.log('✅ Friend added successfully:', newFriend);
             document.getElementById('add-friend-modal').classList.remove('active');
             document.getElementById('add-friend-form').reset();
             loadData();
-            alert('✅ Friend added successfully!');
+            showNotification('✅ Friend added successfully!', 'success');
         } else {
-            alert('Failed to add friend');
+            const errorText = await res.text();
+            console.error('❌ Add friend error:', errorText);
+            alert(`Failed to add friend: ${errorText}`);
         }
     } catch (err) {
-        console.error(err);
-        alert('Failed to add friend');
+        console.error('❌ Add friend network error:', err);
+        alert(`Network error: ${err.message}`);
     }
 });
 
