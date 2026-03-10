@@ -12,6 +12,19 @@ const defaultCategories = [
   'Education',
   'Travel',
   'Groceries',
+  'Gym & Fitness',
+  'Personal Care',
+  'Clothing',
+  'Electronics',
+  'Home & Garden',
+  'Insurance',
+  'Investments',
+  'Gifts & Donations',
+  'Pet Care',
+  'Subscriptions',
+  'Fuel',
+  'Parking',
+  'Maintenance',
   'Other'
 ];
 

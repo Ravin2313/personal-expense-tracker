@@ -192,8 +192,34 @@
                                 </div>
                                 <div class="input-group-modern">
                                     <label class="input-label"><i class="bi bi-credit-card"></i> Payment Method</label>
-                                    <select id="payment-method" class="modern-input">
+                                    <select id="payment-method" class="modern-input" onchange="toggleSplitPayment()">
                                         <option value="Cash">Cash</option>
+                                        <option value="Card">Card</option>
+                                        <option value="UPI">UPI</option>
+                                        <option value="Net Banking">Net Banking</option>
+                                        <option value="Split Payment">Split Payment (Cash + Online)</option>
+                                    </select>
+                                    <span class="input-focus-border"></span>
+                                </div>
+                            </div>
+                            
+                            <!-- Split Payment Options -->
+                            <div class="split-payment-options" id="split-payment-options" style="display: none;">
+                                <div class="form-row">
+                                    <div class="input-group-modern">
+                                        <label class="input-label"><i class="bi bi-cash"></i> Cash Amount</label>
+                                        <input type="number" id="cash-amount" placeholder="Cash portion" class="modern-input">
+                                        <span class="input-focus-border"></span>
+                                    </div>
+                                    <div class="input-group-modern">
+                                        <label class="input-label"><i class="bi bi-credit-card"></i> Online Amount</label>
+                                        <input type="number" id="online-amount" placeholder="Online portion" class="modern-input">
+                                        <span class="input-focus-border"></span>
+                                    </div>
+                                </div>
+                                <div class="input-group-modern">
+                                    <label class="input-label"><i class="bi bi-phone"></i> Online Method</label>
+                                    <select id="online-method" class="modern-input">
                                         <option value="Card">Card</option>
                                         <option value="UPI">UPI</option>
                                         <option value="Net Banking">Net Banking</option>
@@ -201,6 +227,7 @@
                                     <span class="input-focus-border"></span>
                                 </div>
                             </div>
+                            
                             <div class="input-group-modern">
                                 <label class="input-label"><i class="bi bi-image"></i> Receipt (Optional)</label>
                                 <input type="file" id="receipt" accept="image/*" class="modern-input file-input">

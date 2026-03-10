@@ -279,6 +279,7 @@ window.showLogin = showLogin;
 window.showRegister = showRegister;
 window.logout = logout;
 window.toggleSplitOptions = toggleSplitOptions;
+window.toggleSplitPayment = toggleSplitPayment;
 window.clearFilters = clearFilters;
 window.applyFilters = applyFilters;
 window.closeEditModal = closeEditModal;
@@ -370,6 +371,34 @@ async function loadFriends() {
     }
 }
 
+// Toggle split payment options
+function toggleSplitPayment() {
+    const paymentMethod = document.getElementById('payment-method').value;
+    const splitOptions = document.getElementById('split-payment-options');
+    
+    if (paymentMethod === 'Split Payment') {
+        splitOptions.style.display = 'block';
+        splitOptions.classList.add('active');
+        
+        // Auto-calculate when amounts change
+        document.getElementById('cash-amount').addEventListener('input', updateSplitTotal);
+        document.getElementById('online-amount').addEventListener('input', updateSplitTotal);
+    } else {
+        splitOptions.style.display = 'none';
+        splitOptions.classList.remove('active');
+    }
+}
+
+// Update split payment total
+function updateSplitTotal() {
+    const cashAmount = parseFloat(document.getElementById('cash-amount').value) || 0;
+    const onlineAmount = parseFloat(document.getElementById('online-amount').value) || 0;
+    const totalAmount = cashAmount + onlineAmount;
+    
+    // Update main amount field
+    document.getElementById('amount').value = totalAmount;
+}
+
 // Toggle split options
 function toggleSplitOptions() {
     const checkbox = document.getElementById('split-expense');
@@ -454,11 +483,33 @@ document.getElementById('expense-form').addEventListener('submit', async (e) => 
     e.preventDefault();
     
     const formData = new FormData();
+    const paymentMethod = document.getElementById('payment-method').value;
+    
     formData.append('amount', document.getElementById('amount').value);
     formData.append('category', document.getElementById('category').value);
     formData.append('description', document.getElementById('description').value);
     formData.append('date', document.getElementById('date').value);
-    formData.append('paymentMethod', document.getElementById('payment-method').value);
+    
+    // Handle split payment
+    if (paymentMethod === 'Split Payment') {
+        const cashAmount = document.getElementById('cash-amount').value;
+        const onlineAmount = document.getElementById('online-amount').value;
+        const onlineMethod = document.getElementById('online-method').value;
+        
+        if (!cashAmount || !onlineAmount) {
+            alert('Please enter both cash and online amounts');
+            return;
+        }
+        
+        formData.append('paymentMethod', `Cash (₹${cashAmount}) + ${onlineMethod} (₹${onlineAmount})`);
+        formData.append('splitPayment', JSON.stringify({
+            cash: parseFloat(cashAmount),
+            online: parseFloat(onlineAmount),
+            onlineMethod: onlineMethod
+        }));
+    } else {
+        formData.append('paymentMethod', paymentMethod);
+    }
     
     const receiptFile = document.getElementById('receipt').files[0];
     if (receiptFile) {
@@ -1582,7 +1633,7 @@ async function saveBudgetToDatabase(amount) {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'x-auth-token': token
+                'Authorization': `Bearer ${token}`
             },
             body: JSON.stringify({
                 amount,
@@ -1614,7 +1665,7 @@ async function loadBudgetFromDatabase() {
     try {
         const res = await fetch(`${API_URL}/budgets/monthly/${month}/${year}`, {
             headers: {
-                'x-auth-token': token
+                'Authorization': `Bearer ${token}`
             }
         });
         
