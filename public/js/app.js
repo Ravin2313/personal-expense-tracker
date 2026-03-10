@@ -281,6 +281,8 @@ window.logout = logout;
 window.toggleSplitOptions = toggleSplitOptions;
 window.toggleSplitPayment = toggleSplitPayment;
 window.clearFilters = clearFilters;
+window.loadStatsForMonth = loadStatsForMonth;
+window.resetToCurrentMonth = resetToCurrentMonth;
 window.applyFilters = applyFilters;
 window.closeEditModal = closeEditModal;
 window.closeEditIncomeModal = closeEditIncomeModal;
@@ -332,6 +334,9 @@ async function showMainApp() {
     await loadExpenses();
     await loadStats();
     
+    // Initialize month selector
+    initializeMonthSelector();
+    
     // Initialize budget display on load
     const monthExpensesText = document.getElementById('total-expenses')?.textContent || '₹0';
     const monthExpenses = parseFloat(monthExpensesText.replace('₹', '').replace(',', '')) || 0;
@@ -368,6 +373,89 @@ async function loadFriends() {
         }
     } catch (err) {
         console.error('Failed to load friends');
+    }
+}
+
+// Helper functions for month selector
+function getMonthName(month) {
+    const months = [
+        'January', 'February', 'March', 'April', 'May', 'June',
+        'July', 'August', 'September', 'October', 'November', 'December'
+    ];
+    return months[month - 1];
+}
+
+function initializeMonthSelector() {
+    const monthSelector = document.getElementById('month-selector');
+    const yearSelector = document.getElementById('year-selector');
+    
+    if (!monthSelector || !yearSelector) return;
+    
+    // Populate months
+    const months = [
+        'January', 'February', 'March', 'April', 'May', 'June',
+        'July', 'August', 'September', 'October', 'November', 'December'
+    ];
+    
+    monthSelector.innerHTML = '';
+    months.forEach((month, index) => {
+        const option = document.createElement('option');
+        option.value = index + 1;
+        option.textContent = month;
+        monthSelector.appendChild(option);
+    });
+    
+    // Populate years (current year and 2 years back)
+    const currentYear = new Date().getFullYear();
+    yearSelector.innerHTML = '';
+    for (let year = currentYear; year >= currentYear - 2; year--) {
+        const option = document.createElement('option');
+        option.value = year;
+        option.textContent = year;
+        yearSelector.appendChild(option);
+    }
+    
+    // Set current month/year as selected
+    monthSelector.value = selectedMonth;
+    yearSelector.value = selectedYear;
+}
+
+function loadStatsForMonth() {
+    const month = parseInt(document.getElementById('month-selector').value);
+    const year = parseInt(document.getElementById('year-selector').value);
+    
+    loadStats(month, year);
+    loadExpensesForMonth(month, year);
+}
+
+function resetToCurrentMonth() {
+    const now = new Date();
+    selectedMonth = now.getMonth() + 1;
+    selectedYear = now.getFullYear();
+    
+    document.getElementById('month-selector').value = selectedMonth;
+    document.getElementById('year-selector').value = selectedYear;
+    
+    loadStats(selectedMonth, selectedYear);
+    loadExpensesForMonth(selectedMonth, selectedYear);
+}
+
+async function loadExpensesForMonth(month, year) {
+    try {
+        const res = await fetch(`${API_URL}/expenses`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const allExpenses = await res.json();
+        
+        // Filter expenses for selected month/year
+        const monthlyExpenses = allExpenses.filter(exp => {
+            const expDate = new Date(exp.date);
+            return expDate.getMonth() + 1 === month && expDate.getFullYear() === year;
+        });
+        
+        displayExpenses(monthlyExpenses);
+    } catch (err) {
+        console.error('Failed to load monthly expenses:', err);
     }
 }
 
@@ -809,39 +897,39 @@ window.onclick = function(event) {
     }
 }
 
-async function loadStats() {
+let selectedMonth = new Date().getMonth() + 1;
+let selectedYear = new Date().getFullYear();
+
+async function loadStats(month = selectedMonth, year = selectedYear) {
     try {
-        const now = new Date();
-        const month = now.getMonth() + 1;
-        const year = now.getFullYear();
+        selectedMonth = month;
+        selectedYear = year;
         
-        // Get expenses
+        // Get monthly expenses
         const expenseRes = await fetch(`${API_URL}/expenses/stats/${month}/${year}`, {
             headers: { 'Authorization': `Bearer ${token}` }
         });
         const expenseStats = await expenseRes.json();
         const monthExpenses = expenseStats.total || 0;
         
-        // Get all expenses for total
-        const allExpensesRes = await fetch(`${API_URL}/expenses`, {
-            headers: { 'Authorization': `Bearer ${token}` }
-        });
-        const allExpenses = await allExpensesRes.json();
-        const totalExpenses = allExpenses.reduce((sum, exp) => sum + exp.amount, 0);
-        
-        // Get income
+        // Get monthly income
         const incomeRes = await fetch(`${API_URL}/income`, {
             headers: { 'Authorization': `Bearer ${token}` }
         });
         const allIncome = await incomeRes.json();
-        const totalIncome = allIncome.reduce((sum, inc) => sum + inc.amount, 0);
         
-        // Calculate net savings
-        const netSavings = totalIncome - totalExpenses;
+        // Filter income for selected month/year
+        const monthlyIncome = allIncome.filter(inc => {
+            const incDate = new Date(inc.date);
+            return incDate.getMonth() + 1 === month && incDate.getFullYear() === year;
+        }).reduce((sum, inc) => sum + inc.amount, 0);
+        
+        // Calculate net savings for the month
+        const netSavings = monthlyIncome - monthExpenses;
         
         // Update UI
-        document.getElementById('total-income').textContent = `₹${totalIncome}`;
-        document.getElementById('total-expenses').textContent = `₹${totalExpenses}`;
+        document.getElementById('total-income').textContent = `₹${monthlyIncome}`;
+        document.getElementById('total-expenses').textContent = `₹${monthExpenses}`;
         
         const savingsEl = document.getElementById('net-savings');
         savingsEl.textContent = `₹${netSavings}`;
@@ -851,11 +939,27 @@ async function loadStats() {
             savingsEl.style.color = 'var(--danger)';
         }
         
-        // Update budget
-        updateBudgetDisplay(monthExpenses);
+        // Update budget (always for current month)
+        if (month === new Date().getMonth() + 1 && year === new Date().getFullYear()) {
+            updateBudgetDisplay(monthExpenses);
+        } else {
+            // For other months, show budget info differently
+            const budgetLeftEl = document.getElementById('budget-left');
+            const budgetInfoEl = document.getElementById('budget-info');
+            const progressBar = document.getElementById('budget-progress-bar');
+            
+            if (budgetLeftEl && budgetInfoEl && progressBar) {
+                budgetLeftEl.textContent = `₹${monthExpenses}`;
+                budgetInfoEl.textContent = `Expenses for ${getMonthName(month)} ${year}`;
+                progressBar.style.width = '0%';
+                progressBar.className = 'budget-progress-bar';
+            }
+        }
+        
+        console.log(`✅ Stats loaded for ${getMonthName(month)} ${year}`);
         
     } catch (err) {
-        console.error('Failed to load stats');
+        console.error('Failed to load stats:', err);
     }
 }
 

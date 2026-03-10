@@ -129,18 +129,36 @@
 
             <div class="container">
                 <div class="dashboard">
+                    <!-- Month Selector -->
+                    <div class="card" style="margin-bottom: 20px;">
+                        <div class="card-header-custom">
+                            <h3><i class="bi bi-calendar-month"></i> View Data For</h3>
+                            <div style="display: flex; gap: 15px; align-items: center;">
+                                <select id="month-selector" class="modern-input" style="width: 150px;" onchange="loadStatsForMonth()">
+                                    <!-- Options will be populated by JS -->
+                                </select>
+                                <select id="year-selector" class="modern-input" style="width: 100px;" onchange="loadStatsForMonth()">
+                                    <!-- Options will be populated by JS -->
+                                </select>
+                                <button class="btn-modern btn-primary" onclick="resetToCurrentMonth()" style="padding: 8px 16px; font-size: 14px;">
+                                    <i class="bi bi-arrow-clockwise"></i> Current
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
                     <!-- Stats Cards -->
                     <div class="stats-grid">
                         <div class="stat-card">
-                            <h3>Total Income</h3>
+                            <h3>Monthly Income</h3>
                             <p class="stat-value" id="total-income" style="color: var(--success);">₹0</p>
                         </div>
                         <div class="stat-card">
-                            <h3>Total Expenses</h3>
+                            <h3>Monthly Expenses</h3>
                             <p class="stat-value" id="total-expenses" style="color: var(--danger);">₹0</p>
                         </div>
                         <div class="stat-card">
-                            <h3>Net Savings</h3>
+                            <h3>Monthly Savings</h3>
                             <p class="stat-value" id="net-savings">₹0</p>
                         </div>
                         <div class="stat-card stat-card-budget">
