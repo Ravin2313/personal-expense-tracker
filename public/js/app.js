@@ -557,18 +557,26 @@ function displayExpenses(expenses) {
     const list = document.getElementById('expenses-list');
     list.innerHTML = '';
     
+    // For dashboard, show only last 5 expenses
+    const isMainPage = window.location.pathname.includes('index.html') || window.location.pathname === '/';
+    const displayExpenses = isMainPage ? expenses.slice(0, 5) : expenses;
+    
     // Update count badge
     const countBadge = document.getElementById('expense-count');
     if (countBadge) {
-        countBadge.textContent = `${expenses.length} ${expenses.length === 1 ? 'entry' : 'entries'}`;
+        if (isMainPage) {
+            countBadge.textContent = `Last 5 of ${expenses.length}`;
+        } else {
+            countBadge.textContent = `${expenses.length} ${expenses.length === 1 ? 'entry' : 'entries'}`;
+        }
     }
     
-    if (expenses.length === 0) {
+    if (displayExpenses.length === 0) {
         list.innerHTML = '<p style="text-align: center; color: var(--text-secondary); padding: 20px;">No expenses found</p>';
         return;
     }
     
-    expenses.forEach(expense => {
+    displayExpenses.forEach(expense => {
         const item = document.createElement('div');
         item.className = 'expense-item';
         item.innerHTML = `
@@ -586,7 +594,10 @@ function displayExpenses(expenses) {
         list.appendChild(item);
     });
     
-    updateResultsCount(expenses.length);
+    // Only show results count on expenses page
+    if (!isMainPage) {
+        updateResultsCount(expenses.length);
+    }
 }
 
 function updateResultsCount(count) {

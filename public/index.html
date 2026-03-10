@@ -93,6 +93,11 @@
                                 </a>
                             </li>
                             <li class="nav-item">
+                                <a href="expenses.html" class="nav-link">
+                                    <i class="bi bi-receipt me-1"></i>Expenses
+                                </a>
+                            </li>
+                            <li class="nav-item">
                                 <a href="analytics.html" class="nav-link">
                                     <i class="bi bi-graph-up me-1"></i>Analytics
                                 </a>
@@ -282,84 +287,14 @@
                     <div class="card">
                         <div class="card-header-custom">
                             <h3><i class="bi bi-receipt"></i> Recent Expenses</h3>
-                            <span class="card-badge danger" id="expense-count">0 entries</span>
+                            <div style="display: flex; align-items: center; gap: 15px;">
+                                <span class="card-badge danger" id="expense-count">0 entries</span>
+                                <a href="expenses.html" class="btn-modern btn-primary" style="padding: 8px 16px; font-size: 14px; text-decoration: none;">
+                                    <i class="bi bi-eye"></i> View All
+                                </a>
+                            </div>
                         </div>
                         
-                        <!-- Search & Filter Section -->
-                        <div class="search-filter-section">
-                            <div class="search-box">
-                                <i class="bi bi-search"></i>
-                                <input type="text" id="search-input" placeholder="Search by description or amount...">
-                            </div>
-                            
-                            <button class="btn-filter" type="button" data-bs-toggle="collapse" data-bs-target="#filterCollapse">
-                                <i class="bi bi-funnel"></i> Filters
-                            </button>
-                            
-                            <button class="btn-clear-filter" onclick="clearFilters()">
-                                <i class="bi bi-x-circle"></i> Clear
-                            </button>
-                        </div>
-
-                        <!-- Filter Options (Collapsible) -->
-                        <div class="collapse" id="filterCollapse">
-                            <div class="filter-options">
-                                <div class="filter-row">
-                                    <div class="filter-item">
-                                        <label><i class="bi bi-tag"></i> Category</label>
-                                        <select id="filter-category">
-                                            <option value="">All Categories</option>
-                                        </select>
-                                    </div>
-                                    
-                                    <div class="filter-item">
-                                        <label><i class="bi bi-credit-card"></i> Payment Method</label>
-                                        <select id="filter-payment">
-                                            <option value="">All Methods</option>
-                                            <option value="Cash">Cash</option>
-                                            <option value="Card">Card</option>
-                                            <option value="UPI">UPI</option>
-                                            <option value="Net Banking">Net Banking</option>
-                                            <option value="Other">Other</option>
-                                        </select>
-                                    </div>
-                                </div>
-                                
-                                <div class="filter-row">
-                                    <div class="filter-item">
-                                        <label><i class="bi bi-calendar"></i> From Date</label>
-                                        <input type="date" id="filter-date-from">
-                                    </div>
-                                    
-                                    <div class="filter-item">
-                                        <label><i class="bi bi-calendar-check"></i> To Date</label>
-                                        <input type="date" id="filter-date-to">
-                                    </div>
-                                </div>
-                                
-                                <div class="filter-row">
-                                    <div class="filter-item">
-                                        <label><i class="bi bi-currency-rupee"></i> Min Amount</label>
-                                        <input type="number" id="filter-amount-min" placeholder="Min">
-                                    </div>
-                                    
-                                    <div class="filter-item">
-                                        <label><i class="bi bi-currency-rupee"></i> Max Amount</label>
-                                        <input type="number" id="filter-amount-max" placeholder="Max">
-                                    </div>
-                                </div>
-                                
-                                <button class="btn-apply-filter" onclick="applyFilters()">
-                                    <i class="bi bi-check-circle"></i> Apply Filters
-                                </button>
-                            </div>
-                        </div>
-
-                        <!-- Results Count -->
-                        <div class="results-info">
-                            <span id="results-count">Showing all expenses</span>
-                        </div>
-
                         <div id="expenses-list"></div>
                     </div>
 
